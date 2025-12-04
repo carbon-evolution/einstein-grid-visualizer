@@ -23,6 +23,13 @@
 
 This interactive WebGL application uses **React Three Fiber** to render dynamic 3D spacetime grids that warp and bend in response to increasing mass, providing an intuitive understanding of one of the universe's most fundamental concepts.
 
+<div align="center">
+
+![Spacetime Grid Comparison](docs/grid-comparison.png)
+*Visual comparison of how different masses curve spacetime*
+
+</div>
+
 ---
 
 ## ✨ Features
@@ -55,6 +62,12 @@ This interactive WebGL application uses **React Three Fiber** to render dynamic 
 
 ### Einstein's Field Equations
 
+<div align="center">
+
+![Einstein's Field Equations](docs/einstein-equations.png)
+
+</div>
+
 The simulation is based on Einstein's Field Equations:
 
 ```
@@ -68,26 +81,39 @@ Where:
 - **κ** = Einstein's constant (8πG/c⁴)
 - **Tμν** = Stress-energy tensor (describes matter/energy distribution)
 
+> *"Matter tells spacetime how to curve, and curved spacetime tells matter how to move."* — John Wheeler
+
 ### Stellar Evolution Stages
+
+<div align="center">
+
+![Formation Sequence](docs/formation-sequence.png)
+*Progressive stages of stellar collapse and black hole formation*
+
+</div>
 
 1. **Main Sequence Star (Sun)**: 1.0 - 1.4 M☉
    - Yellow-gold coloring
    - Moderate spacetime curvature
+   - Fusion maintains equilibrium against gravity
    
 2. **White Dwarf**: 1.4 - 2.8 M☉
    - Pale blue coloring
    - Increased density, smaller radius
    - Crosses Chandrasekhar Limit
+   - Electron degeneracy pressure supports structure
 
 3. **Neutron Star**: 2.8 - ~3.0 M☉
    - Cyan coloring
-   - Extreme density
+   - Extreme density (~10¹⁴ g/cm³)
    - Approaches TOV Limit
+   - Neutron degeneracy pressure support
 
 4. **Black Hole**: > 3.0 M☉
    - Red/orange accretion disk visualization
    - Maximum spacetime curvature
    - Event horizon formation
+   - No known force can prevent collapse
 
 ### Schwarzschild Radius
 
@@ -142,6 +168,13 @@ Where G is the gravitational constant, M is mass, and c is the speed of light.
 ---
 
 ## 🎮 Usage
+
+<div align="center">
+
+![Control Panel](docs/controls.png)
+*Interactive control panel with play/pause/reset buttons and real-time metrics*
+
+</div>
 
 ### Controls
 
