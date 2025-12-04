@@ -1,3 +1,6 @@
+A 3D interactive simulation visualizing the evolution of spacetime curvature from a Sun to a Black Hole using General Relativity concepts.
+
+
 # 🌌 Spacetime Curvature Evolution
 
 <div align="center">
