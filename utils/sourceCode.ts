@@ -120,43 +120,55 @@ SOFTWARE.`,
   'README.md': `# 🌌 Einstein Grid Visualizer
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Built With](https://img.shields.io/badge/Built%20With-Google%20AI%20Studio-4285F4?logo=google)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![Three.js](https://img.shields.io/badge/Three.js-Fiber-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
 A high-fidelity, interactive 3D simulation visualizing the warping of spacetime caused by celestial bodies of varying masses, based on General Relativity concepts.
 
-![Application Demo](https://via.placeholder.com/800x400/000000/00ccff?text=Einstein+Grid+Visualizer)
+> **Designed and Generated using [Google AI Studio](https://aistudio.google.com/)**
 
-## 🔭 The Concept
+![Application Demo](https://via.placeholder.com/800x400/001966/00ccff?text=Einstein+Grid+Visualizer+Demo)
+*(Replace with actual screenshot of the application)*
 
-According to **Einstein's General Theory of Relativity**, gravity is not a force exerted by one mass on another, but rather a curvature of spacetime caused by mass and energy. Objects follow the "straightest" possible path (geodesics) in this curved environment.
+## 🧠 Scientific Concepts
 
-This application visualizes that curvature using a **3D Volumetric Lattice** (Spacetime Grid) that deforms dynamically.
+This application visualizes gravity not as a force, but as geometric curvature in a 4-dimensional fabric (spacetime), projected here as a **3D Volumetric Lattice**.
 
-**Einstein Field Equation:**
-$$ G_{\\mu\\nu} + \\Lambda g_{\\mu\\nu} = \\kappa T_{\\mu\\nu} $$
+### 1. General Relativity & Embedding Diagrams
+The grid represents an "Embedding Diagram". In flat space (far from mass), the grid lines are straight and equidistant. As mass increases, it distorts the metric tensor, causing the grid lines to curve inward.
+*   **Earth**: Creates a gentle, localized dip.
+*   **Sun**: Creates a wider, deeper gravity well.
+*   **Black Hole**: Creates an asymptotic "throat" where grid lines are pulled infinitely inward.
 
-### Evolution Stages
-The simulation compares a static **Earth** (reference mass) against an evolving star that transitions through:
-1.  **Sun (Main Sequence)**: Moderate curvature, distinct gravity well.
-2.  **Neutron Star**: Intense, sharp gravity well (Mass > 1.4 $M_\\odot$).
-3.  **Black Hole**: Infinite curvature at the singularity, forming an Event Horizon (Mass > 2.8 $M_\\odot$).
+### 2. Stellar Evolution & Limits
+The simulation evolves a star through critical physics thresholds:
+
+*   **Chandrasekhar Limit ($1.4 M_\\odot$)**: The maximum mass of a stable White Dwarf. Beyond this, electron degeneracy pressure fails, and the star collapses into a Neutron Star.
+*   **Tolman-Oppenheimer-Volkoff (TOV) Limit (~$2.8 M_\\odot$)**: The maximum mass of a Neutron Star. Beyond this, neutron degeneracy pressure fails, and the object collapses completely into a **Black Hole**.
+
+![Stellar Evolution](https://via.placeholder.com/800x200/000000/ffffff?text=Sun+%E2%86%92+Neutron+Star+%E2%86%92+Black+Hole)
+
+### 3. The Visual Logic
+*   **Spacetime Grid**: Rendered using a Lorentzian warping function ($1/\\sqrt{r^2 + \\epsilon^2}$) to simulate the "draping" effect of gravity.
+*   **Stress Tensor Colors**:
+    *   🔵 **Blue/Cyan**: Low to Medium curvature (Safe zone).
+    *   🟠 **Orange**: High curvature (Neutron Star surface gravity).
+    *   🔴 **Red**: Extreme curvature (Event Horizon proximity).
 
 ## 🚀 Features
 
 *   **Dual-Body Comparison**: Side-by-side visualization of Earth (static) vs. Evolving Stars.
-*   **Volumetric 3D Grid**: A "ScienceClic" style lattice using Lorentzian gravity mathematics ($1/\\sqrt{r^2 + \\epsilon^2}$) for physically authentic visuals.
-*   **Visual Stress Tensor**: Color gradients (Blue $\\to$ Cyan $\\to$ Orange $\\to$ Red) indicate the intensity of gravitational tension.
+*   **Volumetric 3D Grid**: A "ScienceClic" style lattice with high-resolution subdivision.
 *   **Event Horizon Rendering**: Visualizes the Photon Sphere and Accretion glow for Black Holes.
 *   **Interactive Controls**: Play, Pause, Reset, and Full 3D Camera Orbit/Zoom.
 
 ## 🛠️ Installation & Usage
 
-This project uses [Vite](https://vitejs.dev/) with React and TypeScript.
+This project is a modern web application built with **Vite, React, and Three.js (Fiber)**.
 
 ### 1. Prerequisites
-Ensure you have **Node.js** (v16+) installed.
+Ensure you have **Node.js** (v16+) installed on your machine.
 
 ### 2. Setup
 \`\`\`bash
@@ -176,13 +188,11 @@ npm run dev
 \`\`\`
 Open your browser at \`http://localhost:5173\`.
 
-## 📸 Visuals
+## 📸 Screenshots
 
-### Earth vs. Sun
-![Earth vs Sun](https://via.placeholder.com/400x250/001966/ffffff?text=Earth+Curvature)
-
-### The Black Hole (Event Horizon)
-![Black Hole](https://via.placeholder.com/400x250/000000/ff3300?text=Event+Horizon+Singularity)
+| Earth Curvature | Black Hole Singularity |
+|:---:|:---:|
+| ![Earth](https://via.placeholder.com/400x250/003300/ffffff?text=Earth+Gravity) | ![Black Hole](https://via.placeholder.com/400x250/000000/ff3300?text=Event+Horizon) |
 
 ## 📄 License
 
