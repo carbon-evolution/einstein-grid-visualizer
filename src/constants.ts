@@ -13,13 +13,14 @@ export const GRID_SIZE = 40;
 export const GRID_SEGMENTS = 200;
 export const SIMULATION_SPEED = 0.001; // Further slowed down for better observation
 
-// Positions for Dual View
-export const POS_EARTH = [-8, 0, 0] as [number, number, number];
-export const POS_EVOLVING = [8, 0, 0] as [number, number, number];
+// Orbit Constants
+export const POS_EVOLVING = [0, 0, 0] as [number, number, number]; // Center of the system
+export const ORBIT_RADIUS = 14;
+export const ORBIT_SPEED = 0.4;
 
 // Visual constants for Earth (not physically accurate to scale, but relative for visual)
 export const EARTH_VISUAL_MASS = 0.15;
-export const EARTH_VISUAL_RADIUS = 0.8;
+export const EARTH_VISUAL_RADIUS = 0.35; // Reduced to look smaller compared to Sun
 
 export enum StellarStage {
   EARTH = 'Earth',

@@ -1,7 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { CHANDRASEKHAR_LIMIT, TOV_LIMIT } from '../constants';
+import { CHANDRASEKHAR_LIMIT, TOV_LIMIT, ORBIT_RADIUS, ORBIT_SPEED } from '../constants';
 
 const vertexShader = `
 uniform float uMass1;
@@ -9,69 +9,51 @@ uniform vec3 uPos1;
 uniform float uMass2;
 uniform vec3 uPos2;
 uniform float uTime;
+uniform float uConcentration;
 
 varying float vDistortion;
 varying vec3 vPos;
 varying float vDistance;
 
-// "ScienceClic" Style Lorentzian Gravity Well
-// Smooth, asymptotic funnel that looks physically authentic
 float getDisplacement(float mass, float dist) {
-    // Softening parameter to prevent infinity at r=0
-    // This creates the "throat" look without breaking the vertex shader.
-    // A value around 1.0 - 1.5 gives a nice deep well without artifacts.
-    float epsilon = 1.2; 
-    
-    // Lorentzian-like curve: 1 / sqrt(r^2 + e^2)
-    // This is smoother than 1/r and mimics embedding diagrams better.
+    float epsilon = 2.0 / (uConcentration + 0.5); 
     float curve = 1.0 / sqrt(dist*dist + epsilon*epsilon);
-    
-    // Strength multiplier
-    float strength = mass * 12.0; 
-    
+    float strength = mass * (8.0 + uConcentration * 2.0); 
     return strength * curve;
 }
 
 void main() {
   vec3 pos = position;
   
-  // --- BODY 1: EARTH (Left) ---
+  // --- BODY 1: EARTH (Orbiting) ---
   vec3 dir1 = pos - uPos1;
   float dist1 = length(dir1);
-  // Earth is small, use sharper falloff for local dip
-  float disp1 = (uMass1 * 5.0) / (dist1*dist1 + 2.0); 
+  float disp1 = (uMass1 * 3.0) / (dist1*dist1 + 1.5); 
   
-  // --- BODY 2: EVOLVING (Right) ---
+  // --- BODY 2: EVOLVING (Center) ---
   vec3 dir2 = pos - uPos2;
   float dist2 = length(dir2);
   
-  // Calculate main gravity well displacement
   float factor2 = getDisplacement(uMass2, dist2);
-  
-  // Limit displacement to avoid vertices crossing each other inside the body
-  // (The "Clamping" effect for the singularity)
-  float limit = 0.95; 
+  float limit = 0.98; 
   float disp2 = min(factor2, limit);
 
-  // Apply displacements
   vec3 finalPos = pos;
   
   // Earth Pull
   if (dist1 > 0.1) {
-     finalPos += (uPos1 - finalPos) * disp1 * 0.15; // Gentle pull for Earth
+     finalPos += (uPos1 - finalPos) * disp1 * 0.1; 
   }
   
   // Evolving Body Pull
   if (dist2 > 0.1) {
-     // We pull the grid vertices towards the center of mass
      finalPos += (uPos2 - finalPos) * disp2;
   }
 
   vPos = finalPos;
   
-  // Calculate distortion intensity for fragment shader
-  // We want the red color to appear only deep in the well
-  vDistortion = disp2; 
+  // Distortion for color (mostly tracking central body for drama)
+  vDistortion = disp2 + disp1 * 0.2; 
   
   vDistance = length(finalPos);
   
@@ -86,46 +68,27 @@ varying vec3 vPos;
 varying float vDistance;
 
 void main() {
-  // MATCHING INTENSITY BAR: Blue -> Cyan -> Orange -> Red
-
-  vec3 colorBlue   = vec3(0.0, 0.1, 0.4); // Deep Blue
-  vec3 colorCyan   = vec3(0.0, 0.8, 1.0); // Cyan
-  vec3 colorOrange = vec3(1.0, 0.5, 0.0); // Orange
-  vec3 colorRed    = vec3(1.0, 0.0, 0.0); // Red
+  vec3 colorSafe    = vec3(0.0, 0.2, 0.4);
+  vec3 colorGentle  = vec3(0.0, 0.8, 1.0);
+  vec3 colorIntense = vec3(1.0, 0.6, 0.0);
+  vec3 colorExtreme = vec3(1.0, 0.0, 0.0);
   
   vec3 finalColor;
-  
-  // vDistortion is clamped at ~0.95 max in vertex shader
-  // We map this range strictly to our gradient to avoid white hotspots
-  
   float t = clamp(vDistortion, 0.0, 1.0);
 
-  if (t < 0.15) {
-      // 0.0 to 0.15: Deep Blue -> Cyan
-      // Flat space to mild gravity
-      finalColor = mix(colorBlue, colorCyan, t / 0.15);
-  } else if (t < 0.5) {
-      // 0.15 to 0.5: Cyan -> Orange
-      // Significant gravity (Sun/Neutron Star)
-      finalColor = mix(colorCyan, colorOrange, (t - 0.15) / 0.35);
+  if (t < 0.1) {
+      finalColor = mix(colorSafe, colorGentle, t * 10.0);
+  } else if (t < 0.4) {
+      finalColor = mix(colorGentle, colorIntense, (t - 0.1) / 0.3);
   } else {
-      // 0.5 to 1.0: Orange -> Red
-      // Extreme Gravity (Black Hole/Event Horizon)
-      finalColor = mix(colorOrange, colorRed, (t - 0.5) / 0.45);
+      finalColor = mix(colorIntense, colorExtreme, (t - 0.4) / 0.6);
   }
 
-  // Alpha logic
   float alpha = uOpacity;
+  alpha *= 1.0 - smoothstep(30.0, 50.0, vDistance);
+  float glow = 0.4 + vDistortion * 0.8;
   
-  // Distance fade (World edges)
-  alpha *= 1.0 - smoothstep(25.0, 40.0, vDistance);
-  
-  // Glow logic
-  // We increase alpha slightly with distortion to make the core visible,
-  // but we DO NOT multiply the RGB color values excessively to prevent whiteout.
-  float tensionGlow = 0.5 + vDistortion * 0.5;
-  
-  gl_FragColor = vec4(finalColor, alpha * tensionGlow);
+  gl_FragColor = vec4(finalColor, alpha * glow);
 }
 `;
 
@@ -141,9 +104,9 @@ const SpacetimeMesh: React.FC<SpacetimeMeshProps> = ({ mass1, pos1, mass2, pos2 
 
   const geometry = useMemo(() => {
     const points: number[] = [];
-    const size = 28; // Large coverage
+    const size = 30;
     const steps = 1.5; 
-    const subDivisions = 80; // HIGH RESOLUTION for smooth "Video Style" curves
+    const subDivisions = 64; 
 
     const addLine = (start: THREE.Vector3, end: THREE.Vector3) => {
       const vec = new THREE.Vector3().subVectors(end, start);
@@ -157,20 +120,16 @@ const SpacetimeMesh: React.FC<SpacetimeMeshProps> = ({ mass1, pos1, mass2, pos2 
       }
     };
 
-    // Generate Volumetric Lattice
-    // Y-Axis Layers
     for (let y = -size; y <= size; y += steps) {
       for (let z = -size; z <= size; z += steps) {
         addLine(new THREE.Vector3(-size, y, z), new THREE.Vector3(size, y, z));
       }
     }
-    // Z-Axis Layers
     for (let x = -size; x <= size; x += steps) {
       for (let z = -size; z <= size; z += steps) {
         addLine(new THREE.Vector3(x, -size, z), new THREE.Vector3(x, size, z));
       }
     }
-    // X-Axis Layers
     for (let x = -size; x <= size; x += steps) {
       for (let y = -size; y <= size; y += steps) {
         addLine(new THREE.Vector3(x, y, -size), new THREE.Vector3(x, y, size));
@@ -189,7 +148,8 @@ const SpacetimeMesh: React.FC<SpacetimeMeshProps> = ({ mass1, pos1, mass2, pos2 
       uPos1: { value: new THREE.Vector3(...pos1) },
       uMass2: { value: mass2 },
       uPos2: { value: new THREE.Vector3(...pos2) },
-      uOpacity: { value: 0.5 },
+      uConcentration: { value: 1.0 },
+      uOpacity: { value: 0.4 },
     }),
     [mass1, mass2, pos1, pos2]
   );
@@ -201,30 +161,36 @@ const SpacetimeMesh: React.FC<SpacetimeMeshProps> = ({ mass1, pos1, mass2, pos2 
       // @ts-ignore
       meshRef.current.material.uniforms.uMass1.value = mass1;
       
-      // LOGIC FOR VISUAL MASS INTENSITY
-      // We map the physical mass to a "Visual Intensity Mass" to ensure
-      // the grid deformations match the user's expectation of "Intense Bending".
+      // Update Earth Orbit Position for the Grid Shader
+      const t = state.clock.getElapsedTime();
+      const angle = t * ORBIT_SPEED;
+      // @ts-ignore
+      meshRef.current.material.uniforms.uPos1.value.set(
+        Math.cos(angle) * ORBIT_RADIUS,
+        0,
+        Math.sin(angle) * ORBIT_RADIUS
+      );
       
       let visualMass = mass2;
-      
+      let concentration = 1.0;
+
       if (mass2 <= CHANDRASEKHAR_LIMIT) {
-        // Sun Phase: Linear progression
         visualMass = mass2;
+        concentration = 0.5 + (mass2 - 1.0) * 0.5; 
       } else if (mass2 <= TOV_LIMIT) {
-        // Neutron Star Phase:
-        // We boost this phase significantly to show the "snap" to high gravity
-        const multiplier = 2.5; 
-        visualMass = CHANDRASEKHAR_LIMIT + (mass2 - CHANDRASEKHAR_LIMIT) * multiplier;
+        const nsProgress = (mass2 - CHANDRASEKHAR_LIMIT) / (TOV_LIMIT - CHANDRASEKHAR_LIMIT);
+        visualMass = 2.0 + nsProgress * 4.0; 
+        concentration = 1.5 + nsProgress * 1.5;
       } else {
-        // Black Hole Phase:
-        // Extreme boost for the "Infinite Funnel" look
-        const baseNS = CHANDRASEKHAR_LIMIT + (TOV_LIMIT - CHANDRASEKHAR_LIMIT) * 2.5;
-        const multiplier = 5.0;
-        visualMass = baseNS + (mass2 - TOV_LIMIT) * multiplier;
+        const bhProgress = (mass2 - TOV_LIMIT) / 2.0; 
+        visualMass = 6.0 + bhProgress * 10.0;
+        concentration = 4.0 + bhProgress * 2.0; 
       }
 
       // @ts-ignore
       meshRef.current.material.uniforms.uMass2.value = visualMass;
+      // @ts-ignore
+      meshRef.current.material.uniforms.uConcentration.value = concentration;
     }
   });
 
